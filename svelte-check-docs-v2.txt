@@ -1,0 +1,4 @@
+Loading svelte-check in workspace: /home/a/projects/packages/docs
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings
