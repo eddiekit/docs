@@ -19,7 +19,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CONTENT_DIR = path.join(__dirname, "..", "src", "content");
 const SIBLING_PACKAGES_DIR = path.join(__dirname, "..", "..");
 
-const PACKAGES = ["session", "auth", "captcha", "limiter", "mail"];
+const PACKAGES = ["session", "auth", "captcha", "limiter", "mail", "storage"];
 
 async function readLocalReadme(pkg) {
     try {
