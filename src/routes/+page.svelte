@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { base } from "$app/paths";
+
 	const modules = import.meta.glob("/src/content/*.md", { eager: true }) as Record<
 		string,
 		{ metadata?: { title?: string } }
@@ -26,7 +28,7 @@
 	<div class="mt-12 grid grid-cols-2 gap-6">
 		{#each packages as pkg}
 			<a
-				href="/{pkg.id}"
+				href="{base}/{pkg.id}"
 				class="group rounded-xl border border-slate-800 p-6 transition-colors hover:bg-slate-900"
 			>
 				<h3 class="text-blue-400 group-hover:text-blue-300">{pkg.name}</h3>

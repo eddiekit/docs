@@ -1,6 +1,7 @@
 <script lang="ts">
 	import "../app.css";
 	import { page } from "$app/stores";
+	import { base } from "$app/paths";
 
 	let { children } = $props();
 
@@ -29,7 +30,7 @@
 		class="sticky top-0 flex h-screen w-64 flex-col gap-8 overflow-y-auto border-r border-slate-800 p-6"
 	>
 		<a
-			href="/"
+			href="{base}/"
 			class="flex items-center gap-2 transition-opacity hover:opacity-80"
 		>
 			<div
@@ -50,7 +51,7 @@
 				{#each packages as pkg}
 					<li>
 						<a
-							href="/{pkg.id}"
+							href="{base}/{pkg.id}"
 							class="block rounded-md px-3 py-2 transition-colors {currentPackageId ===
 							pkg.id
 								? 'bg-blue-600/10 font-medium text-blue-400'
