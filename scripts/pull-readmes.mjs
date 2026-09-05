@@ -3,8 +3,11 @@
 //
 // Looks for a sibling package directory first (../../<package>/README.md - true when this repo
 // is checked out alongside the others, as in local development), and falls back to fetching the
-// published README from GitHub (so this also works when the docs repo is checked out on its own,
-// e.g. in CI for a GitHub Pages deploy).
+// README from GitHub (so this also works when the docs repo is checked out on its own, e.g. in
+// CI for a GitHub Pages deploy). The source repos are private, so that fallback needs a token
+// with read access to them - set ORG_READ_TOKEN (a fine-grained PAT scoped to Contents: Read-only
+// on the relevant repos) and it'll use the authenticated Contents API; without it, only public
+// repos will resolve via the plain raw.githubusercontent.com URL.
 //
 // Output is generated, not committed - see .gitignore.
 
@@ -27,9 +30,27 @@ async function readLocalReadme(pkg) {
 }
 
 async function readRemoteReadme(pkg) {
-    const url = `https://raw.githubusercontent.com/eddiekit/${pkg}/main/README.md`;
+    const token = process.env.ORG_READ_TOKEN;
+
+    if (token) {
+        try {
+            const response = await fetch(`https://api.github.com/repos/eddiekit/${pkg}/contents/README.md`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: "application/vnd.github.raw+json",
+                    "X-GitHub-Api-Version": "2022-11-28",
+                },
+            });
+            if (response.ok) {
+                return await response.text();
+            }
+        } catch {
+            // fall through to the unauthenticated attempt below
+        }
+    }
+
     try {
-        const response = await fetch(url);
+        const response = await fetch(`https://raw.githubusercontent.com/eddiekit/${pkg}/main/README.md`);
         return response.ok ? await response.text() : null;
     } catch {
         return null;
