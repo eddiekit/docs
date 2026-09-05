@@ -20,6 +20,7 @@ const CONTENT_DIR = path.join(__dirname, "..", "src", "content");
 const SIBLING_PACKAGES_DIR = path.join(__dirname, "..", "..");
 
 const PACKAGES = ["session", "auth", "captcha", "limiter", "mail", "storage"];
+const TOOLS = ["cli"];
 
 async function readLocalReadme(pkg) {
     try {
@@ -57,30 +58,33 @@ async function readRemoteReadme(pkg) {
     }
 }
 
+const TITLE_OVERRIDES = { cli: "CLI" };
+
 function titleCase(pkg) {
-    return pkg.charAt(0).toUpperCase() + pkg.slice(1);
+    return TITLE_OVERRIDES[pkg] ?? pkg.charAt(0).toUpperCase() + pkg.slice(1);
 }
 
 async function main() {
     await rm(CONTENT_DIR, { recursive: true, force: true });
     await mkdir(CONTENT_DIR, { recursive: true });
 
+    const all = [...PACKAGES.map((id) => ({ id, category: "package" })), ...TOOLS.map((id) => ({ id, category: "cli" }))];
     const pulled = [];
 
-    for (const pkg of PACKAGES) {
-        const readme = (await readLocalReadme(pkg)) ?? (await readRemoteReadme(pkg));
+    for (const { id, category } of all) {
+        const readme = (await readLocalReadme(id)) ?? (await readRemoteReadme(id));
 
         if (readme === null) {
-            console.warn(`[pull-readmes] No README found for "${pkg}" (checked local sibling dir and GitHub) - skipping.`);
+            console.warn(`[pull-readmes] No README found for "${id}" (checked local sibling dir and GitHub) - skipping.`);
             continue;
         }
 
-        const frontmatter = `---\ntitle: "${titleCase(pkg)}"\n---\n\n`;
-        await writeFile(path.join(CONTENT_DIR, `${pkg}.md`), frontmatter + readme, "utf8");
-        pulled.push(pkg);
+        const frontmatter = `---\ntitle: "${titleCase(id)}"\ncategory: "${category}"\n---\n\n`;
+        await writeFile(path.join(CONTENT_DIR, `${id}.md`), frontmatter + readme, "utf8");
+        pulled.push(id);
     }
 
-    console.log(`[pull-readmes] Pulled ${pulled.length}/${PACKAGES.length} README(s): ${pulled.join(", ") || "none"}`);
+    console.log(`[pull-readmes] Pulled ${pulled.length}/${all.length}: ${pulled.join(", ") || "none"}`);
 }
 
 main();
