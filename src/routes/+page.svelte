@@ -1,5 +1,19 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	const modules = import.meta.glob("/src/content/*.md", { eager: true }) as Record<
+		string,
+		{ metadata?: { title?: string } }
+	>;
+
+	function titleCase(id: string) {
+		return id.charAt(0).toUpperCase() + id.slice(1);
+	}
+
+	const packages = Object.entries(modules)
+		.map(([filePath, mod]) => {
+			const id = filePath.replace("/src/content/", "").replace(".md", "");
+			return { id, name: mod.metadata?.title ?? titleCase(id) };
+		})
+		.sort((a, b) => a.name.localeCompare(b.name));
 </script>
 
 <div class="prose max-w-none prose-invert prose-blue">
@@ -10,23 +24,13 @@
 	</p>
 
 	<div class="mt-12 grid grid-cols-2 gap-6">
-		<a
-			href="/session/v1.0.0/introduction"
-			class="group rounded-xl border border-slate-800 p-6 transition-colors hover:bg-slate-900"
-		>
-			<h3 class="text-blue-400 group-hover:text-blue-300">Session Management</h3>
-			<p class="mt-2 text-slate-400">
-				Database-agnostic session management with support for multiple stores.
-			</p>
-		</a>
-		<a
-			href="/auth/v1.0.0/introduction"
-			class="group rounded-xl border border-slate-800 p-6 transition-colors hover:bg-slate-900"
-		>
-			<h3 class="text-blue-400 group-hover:text-blue-300">Authentication</h3>
-			<p class="mt-2 text-slate-400">
-				Powerful authentication flows built on top of our session package.
-			</p>
-		</a>
+		{#each packages as pkg}
+			<a
+				href="/{pkg.id}"
+				class="group rounded-xl border border-slate-800 p-6 transition-colors hover:bg-slate-900"
+			>
+				<h3 class="text-blue-400 group-hover:text-blue-300">{pkg.name}</h3>
+			</a>
+		{/each}
 	</div>
 </div>
